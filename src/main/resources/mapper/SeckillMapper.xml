@@ -1,0 +1,50 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.com.seckill.dao.SeckillDao">
+    <sql id="Base_Column_List">
+        seckill_id,name,number,start_time,end_time,create_time
+    </sql>
+    
+    <resultMap id="BaseResultMap" type="com.seckill.entity.Seckill">
+        <id column="seckill_id" property="seckillId" jdbcType="bigint"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="number" property="number" jdbcType="int"/>
+        <result column="start_time" property="startTime" jdbcType="timestamp"/>
+        <result column="end_time" property="endTime" jdbcType="timestamp"/>
+        <result column="create_time" property="createTime" jdbcType="timestamp"/>
+    </resultMap>
+    
+    <update id="reduceNumber">
+        update
+            seckill
+        set
+            number = number - 1
+        where seckill_id = #{seckillId}
+        and start_time <![CDATA[ <= ]]> #{killTime}
+        and end_time >= #{killTime}
+        and number > 0
+    </update>
+    <select id="queryById"  resultType="com.seckill.entity.Seckill" parameterType="long">
+        select
+            <include refid="Base_Column_List"/>
+        from seckill
+        where seckill_id = #{seckillId}
+    </select>
+    <select id="queryAll" resultType="com.seckill.entity.Seckill">
+        select
+        <include refid="Base_Column_List"/>
+        from seckill
+        order by create_time desc
+        limit #{offset},#{limit}
+
+    </select>
+    <select id="killByProcedure" statementType="CALLABLE">
+        call execute_seckill(
+            #{seckillId,jdbyTpe=BIGINT,mode=IN},
+            #{phone,jdbyTpe=BIGINT,mode=IN},
+            #{killTime,jdbyTpe=TIMESTAMP,mode=IN},
+            #{result,jdbyTpe=INTEGER,mode=OUT}
+        )
+    </select>
+</mapper>
